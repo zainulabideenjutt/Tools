@@ -1,10 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
-from rest_framework import status
 from docx2pdf import convert
-import aspose.words as aw
-import win32com.client
 from pathlib import Path
 import os
 from django.core.files.storage import FileSystemStorage
