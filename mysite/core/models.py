@@ -1,6 +1,11 @@
 from django.db import models
 
 # Create your models here.
-class WordToPDFModel(models.Model):
+class ConverterModel(models.Model):
     file=models.FileField()
-    pdfFile=models.TextField(null=True,blank=True,default="")
+    ConvertedFile=models.TextField(null=True,blank=True,default="")
+    
+class ImageConverterModel(models.Model):
+    image=models.ImageField()
+    convertedImage=models.TextField(null=True,blank=True,default="")
+    

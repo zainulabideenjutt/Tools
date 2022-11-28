@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import WordToPDFModel
-class WordToPDFSerializer(serializers.ModelSerializer):
+from .models import ConverterModel
+from .models import ImageConverterModel
+class ConverterSerializer(serializers.ModelSerializer):
         class Meta:
-            model = WordToPDFModel
+            model = ConverterModel
             fields = "__all__"
+class ImageConverterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =ImageConverterModel
+        fields='__all__'
