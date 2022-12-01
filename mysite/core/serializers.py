@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ConverterModel
-from .models import ImageConverterModel
+from .models import ImageConverterModel,PdfToImageModel
 class ConverterSerializer(serializers.ModelSerializer):
         class Meta:
             model = ConverterModel
@@ -9,3 +9,11 @@ class ImageConverterSerializer(serializers.ModelSerializer):
     class Meta:
         model =ImageConverterModel
         fields='__all__'
+class PdfToImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =PdfToImageModel
+        fields='__all__'
+class PdfToOnlyImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =PdfToImageModel
+        fields=['id','Image']
