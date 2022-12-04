@@ -2,15 +2,15 @@ import webp
 from rest_framework.decorators import api_view
 from PIL import ImageFilter
 import shutil
+from pytube import YouTube
+from pytube import Playlist
+from spellchecker import SpellChecker
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse
 from docx2pdf import convert
 import datetime
 import uuid
-import string
-import random
-import io
 import os
 from pdf2image import convert_from_path
 from django.core.files.storage import default_storage
@@ -24,6 +24,65 @@ from rest_framework import generics
 from PIL import Image
 from django.shortcuts import get_object_or_404
 # Create your views here.
+class PlaylistDownloader(APIView):
+    def post(self,request,*args,**kwargs):
+        p = Playlist('https://www.youtube.com/watch?v=IWokdGbPk50&list=PLasCX3wfxLR0OmydLRqU1kwPL5IYhtK5E&index=1')
+        # yt = YouTube('https://www.youtube.com/watch?v=oTKtF3IzamM')
+        data={}
+        i=0
+        for video in p.videos:
+            Url1080p=video.streams.filter(resolution='1080p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url1080p']=Url1080p
+            Url720p=video.streams.filter(resolution='720p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url720p']=Url720p
+            Url480p=video.streams.filter(resolution='480p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url480p']=Url480p
+            Url360p=video.streams.filter(resolution='360p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url360p']=Url360p
+            Url240p=video.streams.filter(resolution='240p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url240p']=Url240p
+            Url144p=video.streams.filter(resolution='144p',file_extension='mp4').first().url
+            data[f'videoNO_{i}_Url144p']=Url144p
+            audio=video.streams.filter(only_audio=True).desc().first().url   
+            data[f'videoNO_{i}_Audio']=audio
+            i=i+1
+        return Response(data)
+class VideoDownloader(APIView):
+    def post(self,request,*args,**kwargs):
+        yt = YouTube('https://www.youtube.com/watch?v=oTKtF3IzamM')
+        Url1080p=yt.streams.filter(resolution='1080p',file_extension='mp4').first().url
+        Url720p=yt.streams.filter(resolution='720p',file_extension='mp4').first().url
+        Url480p=yt.streams.filter(resolution='480p',file_extension='mp4').first().url
+        Url360p=yt.streams.filter(resolution='360p',file_extension='mp4').first().url
+        Url240p=yt.streams.filter(resolution='240p',file_extension='mp4').first().url
+        Url144p=yt.streams.filter(resolution='144p',file_extension='mp4').first().url
+        audio=yt.streams.filter(only_audio=True).desc().first().url   
+        data={'Url1080p':Url1080p,'Url720p':Url720p,'Url480p':Url480p,'Url360p':Url360p,'Url240p':Url240p,'Url144p':Url144p,'Audio':audio}
+        return Response(data)
+class ImagesToPdf(APIView):
+    def post(self,request,*args,**kwargs):
+        images=[]
+        if request.data['image1'] != '':
+            images.append(request.data['image1'])
+            if request.data['image2'] != '':
+                images.append(request.data['image2'])
+                if request.data['image3'] != '':
+                    images.append(request.data['image3'])
+                    if request.data['image4'] != '':
+                        images.append(request.data['image4'])
+                        if request.data['image5'] != '':
+                            images.append(request.data['image5'])
+        allimages = [
+        Image.open(f).convert('RGB')
+        for f in images
+        ]
+        randomString=f"{datetime.datetime.now().date()}_{str(datetime.datetime.now().time()).replace('.','').replace(':','')}"
+        basePath=Path(__file__).resolve().parent.parent
+        mediaPath=f"{basePath}\media\\"
+        pdf_path = mediaPath+randomString+'.pdf'
+        print(pdf_path)
+        allimages[0].save(pdf_path, "PDF" ,resolution=100, save_all=True, append_images=allimages[1:])
+        return Response({'detail':'Message'})
 class PdfToImage(generics.ListCreateAPIView,generics.DestroyAPIView):
     queryset=PdfToImageModel.objects.all()
     serializer_class=PdfToImageSerializer
@@ -132,6 +191,24 @@ class WordManager(APIView):
             words=request.data['words']
             upperCaseWords=words.upper()
             return Response({'UpperCase':upperCaseWords})
+        if request.data['purpose']=='spellingcheck':
+            spell = SpellChecker()
+            words=request.data['words']
+            wordlist=['let', 'us', 'wlak','on','the','groun']
+            misspelled=spell.unknown(wordlist)
+            misspelledWithIndex=[]
+            for word in misspelled:
+                misspelledWithIndex.append(wordlist.index(word))
+                misspelledWithIndex.append(word)
+            corrected=[]
+            candidates=[]
+            for word in misspelled:
+                corrected.append(list(wordlist).index(word))     
+                corrected.append(spell.correction(word))
+                candidates.append(wordlist.index(word)) 
+                candidates.append(word)
+                candidates.append(spell.candidates(word))
+            return Response({'Missplled':misspelledWithIndex,'Most Likely Words':corrected,'Candidates Words':candidates})
 class ImageConverter(generics.ListCreateAPIView,generics.RetrieveAPIView):
     queryset=ImageConverterModel.objects.all()
     serializer_class=ImageConverterSerializer
