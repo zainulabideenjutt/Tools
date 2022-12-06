@@ -14,56 +14,58 @@ class ImageConverter(generics.ListCreateAPIView,generics.RetrieveAPIView):
             serializer.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get(self,request,*args,**kwargs):
+        pk=kwargs.get('pk')
+        if pk is not None:
+            return self.retrieve(request,*args,**kwargs)
+        return self.list(request,*args,**kwargs)
     def post(self,request,*args,**kwargs):
-        if request.data['image']:
-            imageName=request.data['image'].name
-            inComingImageFile=request.data['image']
+        inComingImageFile=request.data.get('image')
+        if inComingImageFile is not None:
+            print(inComingImageFile)
+            imageName=inComingImageFile.name
             InComingFileExtension=imageName[imageName.rindex('.'):]
             image=Image.open(inComingImageFile)
         else:
             return Response({'detail':'please provide a image you want to convert.'})
-        inComingPurpose=""
-        if request.data['convert_to']:
-            convertToFileExtension=request.data['convert_to']
-        elif request.data['purpose']:
-            inComingPurpose=request.data['purpose']
-        else:
-            return Response({'detail':'please provide a image you want to convert.'})
+        convertToFileExtension=request.data.get('convert_to')
+        inComingPurpose=request.data.get('purpose')
         randomString=f"{datetime.datetime.now().date()}_{str(datetime.datetime.now().time()).replace('.','').replace(':','')}"
         basePath=Path(__file__).resolve().parent.parent.parent
         imagePath=f"{basePath}\media\\"
-        if  inComingPurpose=='resize' and inComingImageFile:
-            randomImageName=f"image_{randomString}_{self.generate_random_string()}"
-            width=request.data['width']
-            height=request.data['height']
-            RGBImage=image.resize((width,height))
-            RGBImage.save(f"{imagePath}{randomImageName}{InComingFileExtension}")
-            domain=request.get_host()
-            storagePathFromDomain=f"http://{domain}/media/"
-            data={'convertedFromExtension':InComingFileExtension,
-                'convertedImage':f'{storagePathFromDomain}{randomImageName}{InComingFileExtension}',  
-                }
-            return self.return_response(data=data)
-        if inComingPurpose=='crop' and inComingImageFile :
-            randomImageName=f"image_{randomString}_{self.generate_random_string()}"
-            # RGBImage=image.convert('RGB')
-            width, height = image.size
-            if request.data['x_axis'] and request.data['y_axis'] and request.data['width'] and request.data['height']:
-                x_axis = request.data['x_axis']
-                y_axis = request.data['y_axis']
-                xPlusWidth = request.data['width']+x_axis
-                yPlusHeight = request.data['height']+y_axis
-                if x_axis < width and y_axis<height and  xPlusWidth>width-x_axis and yPlusHeight>height-y_axis :
-                    RGBImage=image.crop((x_axis,y_axis,xPlusWidth,yPlusHeight))
-                    RGBImage.save(f"{imagePath}{randomImageName}{InComingFileExtension}")
-                    domain=request.get_host()
-                    storagePathFromDomain=f"http://{domain}/media/"
-                    data={'convertedFromExtension':InComingFileExtension,
-                        'convertedImage':f'{storagePathFromDomain}{randomImageName}{InComingFileExtension}',  
-                        }
-                    return self.return_response(data=data)
-            else:
-                return Response({'detail':'something went wrong with coordinates'})
+        if inComingPurpose is not None:
+            if  inComingPurpose=='resize' and inComingImageFile:
+                randomImageName=f"image_{randomString}_{self.generate_random_string()}"
+                width=request.data['width']
+                height=request.data['height']
+                RGBImage=image.resize((width,height))
+                RGBImage.save(f"{imagePath}{randomImageName}{InComingFileExtension}")
+                domain=request.get_host()
+                storagePathFromDomain=f"http://{domain}/media/"
+                data={'convertedFromExtension':InComingFileExtension,
+                    'convertedImage':f'{storagePathFromDomain}{randomImageName}{InComingFileExtension}',  
+                    }
+                return self.return_response(data=data)
+            if inComingPurpose=='crop' and inComingImageFile :
+                randomImageName=f"image_{randomString}_{self.generate_random_string()}"
+                # RGBImage=image.convert('RGB')
+                width, height = image.size
+                if request.data['x_axis'] and request.data['y_axis'] and request.data['width'] and request.data['height']:
+                    x_axis = request.data['x_axis']
+                    y_axis = request.data['y_axis']
+                    xPlusWidth = request.data['width']+x_axis
+                    yPlusHeight = request.data['height']+y_axis
+                    if x_axis < width and y_axis<height and  xPlusWidth>width-x_axis and yPlusHeight>height-y_axis :
+                        RGBImage=image.crop((x_axis,y_axis,xPlusWidth,yPlusHeight))
+                        RGBImage.save(f"{imagePath}{randomImageName}{InComingFileExtension}")
+                        domain=request.get_host()
+                        storagePathFromDomain=f"http://{domain}/media/"
+                        data={'convertedFromExtension':InComingFileExtension,
+                            'convertedImage':f'{storagePathFromDomain}{randomImageName}{InComingFileExtension}',  
+                            }
+                        return self.return_response(data=data)
+                else:
+                    return Response({'detail':'something went wrong with coordinates'})
         if convertToFileExtension=='.png' and InComingFileExtension=='.gif':
             randomImageName=f"image_{randomString}_{self.generate_random_string()}"
             RGBImage=image.convert('RGB')
@@ -79,7 +81,7 @@ class ImageConverter(generics.ListCreateAPIView,generics.RetrieveAPIView):
             RGBImage=image.convert('RGB')
             RGBImage.save(f"{imagePath}{randomImageName}{convertToFileExtension}",format='png')
             domain=request.get_host()
-            storagePathFromDomain=f"http://{domain}/media/"
+            storagePathFromDomain=f"https://{domain}/media/"
             data={'convertedFromExtension':InComingFileExtension,
                 'convertedImage':f'{storagePathFromDomain}{randomImageName}{convertToFileExtension}',  
                   }

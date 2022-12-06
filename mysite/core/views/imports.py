@@ -18,8 +18,8 @@ from django.core.files.storage import default_storage
 # from pdf2docx import parse
 from pathlib import Path
 from rest_framework import status
-from ..serializers import ConverterSerializer,ImageConverterSerializer,PdfToImageSerializer,PdfToOnlyImageSerializer
-from ..models import ConverterModel,ImageConverterModel,PdfToImageModel
+from ..serializers import ConverterSerializer,ImageConverterSerializer,PdfToImageSerializer,PdfToOnlyImageSerializer,ImagesToPdfSerializer
+from ..models import ConverterModel,ImageConverterModel,PdfToImageModel,ImagesToPdf as ImagestoPdfModel
 from rest_framework import generics
 from PIL import Image
 from django.shortcuts import get_object_or_404

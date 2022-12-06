@@ -1,5 +1,5 @@
 from .imports import *
-class PdfToImage(generics.ListCreateAPIView,generics.DestroyAPIView):
+class PdfToImage(generics.ListCreateAPIView,generics.DestroyAPIView,generics.RetrieveAPIView):
     queryset=PdfToImageModel.objects.all()
     serializer_class=PdfToImageSerializer
     def generate_random_string(self,string_length=6):
@@ -14,6 +14,11 @@ class PdfToImage(generics.ListCreateAPIView,generics.DestroyAPIView):
             serializer.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get(self,request,*args,**kwargs):
+        pk=kwargs.get('pk')
+        if pk is not None:
+            return self.retrieve(request,*args,**kwargs)
+        return self.list(request,*args,**kwargs)
     def post(self,request,*args,**krargs):
         imageName=request.data['image'].name
         inComingImageFile=request.data['image']
@@ -61,6 +66,7 @@ class PdfToImage(generics.ListCreateAPIView,generics.DestroyAPIView):
             serializer = PdfToOnlyImageSerializer(qs,many=True)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response({'detail':'something went Wrong'})
     def delete(self,request,*args,**kwargs):
             if kwargs:
                 id=kwargs['pk']

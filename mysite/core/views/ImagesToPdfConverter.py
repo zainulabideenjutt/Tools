@@ -1,23 +1,25 @@
 from .imports import *
-class ImagesToPdf(APIView):
+class ImagesToPdf(generics.ListCreateAPIView,generics.RetrieveAPIView):
+    queryset=ImagestoPdfModel.objects.all()
+    serializer_class=ImagesToPdfSerializer
     def return_response(self,**data):
             serializer = self.get_serializer(data=data['data'])
             serializer.is_valid(raise_exception=True)
             serializer.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get(self,request,*args,**kwargs):
+        pk=kwargs.get('pk')
+        if pk is not None:
+            return self.retrieve(request,*args,**kwargs)
+        return self.list(request,*args,**kwargs)
     def post(self,request,*args,**kwargs):
         images=[]
-        if request.data['image1'] != '':
-            images.append(request.data['image1'])
-            if request.data['image2'] != '':
-                images.append(request.data['image2'])
-                if request.data['image3'] != '':
-                    images.append(request.data['image3'])
-                    if request.data['image4'] != '':
-                        images.append(request.data['image4'])
-                        if request.data['image5'] != '':
-                            images.append(request.data['image5'])
+        images.append(request.data.get('image1') or "")
+        images.append(request.data.get('image2') or "")
+        images.append(request.data.get('image3') or "")
+        images.append(request.data.get('image4') or "")
+        images.append(request.data.get('image5') or "")
         allimages = [
         Image.open(f).convert('RGB')
         for f in images
@@ -34,28 +36,28 @@ class ImagesToPdf(APIView):
             if kwargs:
                 id=kwargs['pk']
                 if (type(id)==type(1)):
-                    instance=get_object_or_404(PdfToImageModel, pk=id)
+                    instance=get_object_or_404(ImagestoPdfModel, pk=id)
                     if instance:
-                        FolderName=instance.folderName
+                        pdfName=instance.pdfName
                         basePath=Path(__file__).resolve().parent.parent.parent
                         path=f"{basePath}\media\\"
                         instance.delete()
                         try:
-                            shutil.rmtree(path+FolderName)
+                            os.remove(f'{path}{pdfName}')
                         except FileNotFoundError:
-                            return Response({'detail':f"{FolderName} is not Available in Your Files"},status=status.HTTP_404_NOT_FOUND)
+                            return Response({'detail':f"{pdfName} is not Available in Your Files"},status=status.HTTP_404_NOT_FOUND)
                         return Response({'detail':'Image and Instance Has been Deleted'},status=status.HTTP_204_NO_CONTENT)
                 return Response({'detail':"instance doesnot exist"})
             if not kwargs:
-                qs=PdfToImageModel.objects.all()
+                qs=ImagestoPdfModel.objects.all()
                 if qs:
                     for instance in qs :
-                        FolderName=instance.folderName
+                        pdfName=instance.pdfName
                         basePath=Path(__file__).resolve().parent.parent.parent
                         path=f"{basePath}\media\\"
                         instance.delete()
                         try:
-                            shutil.rmtree(path+FolderName)
+                            os.remove(f'{path}{pdfName}')
                         except FileNotFoundError:
                             continue
                             
