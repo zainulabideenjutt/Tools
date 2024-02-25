@@ -13,5 +13,8 @@ class PdfToImageModel(models.Model):
     folderName=models.TextField(null=True,blank=True,default="")
     Image=models.TextField(null=True,blank=True,default="")
 
+class ImagesToPdf(models.Model):
+    pdfName=models.TextField(null=True,blank=True,default="")
+
 
     
