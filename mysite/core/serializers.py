@@ -6,9 +6,28 @@ class ConverterSerializer(serializers.ModelSerializer):
             model = ConverterModel
             fields = "__all__"
 class ImageConverterSerializer(serializers.ModelSerializer):
+    convert_to = serializers.ChoiceField(
+        choices=[
+            ('.jpg', 'JPEG'),
+            ('.png', 'PNG'),
+            ('.gif', 'GIF'),
+            ('.webp', 'WEBP'),
+            ('.tiff', 'TIFF'),
+            ('.bmp', 'BMP')
+        ],required=False,
+        help_text="Choose the format to convert the image to."
+    )
+
     class Meta:
-        model =ImageConverterModel
-        fields='__all__'
+        model = ImageConverterModel
+        fields = ['id','original_image', 'convert_to', 'converted_image']
+        read_only_fields = ['converted_image']
+
+    def create(self, validated_data):
+        convert_to = validated_data.pop('convert_to')  # Remove convert_to from validated_data
+        instance = super().create(validated_data)  # Create the model instance without convert_to
+        # Handle any conversion logic here if necessary
+        return instance
 class PdfToImageSerializer(serializers.ModelSerializer):
     class Meta:
         model =PdfToImageModel

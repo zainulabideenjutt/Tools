@@ -6,9 +6,9 @@ class ConverterModel(models.Model):
     ConvertedFile=models.TextField(null=True,blank=True,default="")
     
 class ImageConverterModel(models.Model):
-    # image=models.ImageField()
-    convertedFromExtension=models.TextField(null=True,blank=True,default='')
-    convertedImage=models.TextField(null=True,blank=True,default="")
+    original_image = models.ImageField(upload_to='original_images/', blank=True, null=True)
+    converted_image = models.ImageField(upload_to='converted_images/', blank=True, null=True)
+    
 class PdfToImageModel(models.Model):
     folderName=models.TextField(null=True,blank=True,default="")
     Image=models.TextField(null=True,blank=True,default="")
