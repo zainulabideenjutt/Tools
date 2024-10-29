@@ -12,14 +12,14 @@ from docx2pdf import convert
 import datetime
 import uuid
 import os
-from pdf2image import convert_from_path
+# from pdf2image import convert_from_path
 from django.core.files.storage import default_storage
 # from pdf2docx import Converter
 # from pdf2docx import parse
 from pathlib import Path
 from rest_framework import status
-from ..serializers import ConverterSerializer,ImageConverterSerializer,PdfToImageSerializer,PdfToOnlyImageSerializer,ImagesToPdfSerializer
-from ..models import ConverterModel,ImageConverterModel,PdfToImageModel,ImagesToPdf as ImagestoPdfModel
+from ..serializers import ConverterSerializer,ImageConverterSerializer,PdfToImagesSerializer,ImagesToPdfSerializer
+from ..models import ConverterModel,ImageConverterModel,ImagesToPdf as ImagestoPdfModel,PdfToImagesModel
 from rest_framework import generics
 from PIL import Image
 from django.shortcuts import get_object_or_404

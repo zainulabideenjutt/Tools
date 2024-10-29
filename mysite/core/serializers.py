@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ConverterModel
-from .models import ImageConverterModel,PdfToImageModel,ImagesToPdf
+from .models import ImageConverterModel,ImagesToPdf,PdfToImagesModel
 class ConverterSerializer(serializers.ModelSerializer):
         class Meta:
             model = ConverterModel
@@ -28,15 +28,16 @@ class ImageConverterSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)  # Create the model instance without convert_to
         # Handle any conversion logic here if necessary
         return instance
-class PdfToImageSerializer(serializers.ModelSerializer):
+class PdfToImagesSerializer(serializers.ModelSerializer):
     class Meta:
-        model =PdfToImageModel
-        fields='__all__'
+        model = PdfToImagesModel
+        fields = ['document', 'converted_images']
+        read_only_fields = ['converted_images']
 class ImagesToPdfSerializer(serializers.ModelSerializer):
     class Meta:
         model =ImagesToPdf
         fields='__all__'
-class PdfToOnlyImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =PdfToImageModel
-        fields=['id','Image']
+# class PdfToOnlyImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model =PdfToImageModel
+#         fields=['id','Image']
